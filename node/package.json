@@ -1,0 +1,42 @@
+{
+  "name": "hubspot-oauth",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">= 10.13.0"
+  },
+  "description": "hubspot-node client sample applications",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint . && prettier --list-different './**/*.{js,json}'",
+    "prettier:write": "prettier --write './**/*.{js,json}'"
+  },
+  "keywords": [
+    "hubspot",
+    "oauth",
+    "contacts",
+    "sample",
+    "example"
+  ],
+  "author": "hubspot",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@hubspot/api-client": "^11.0.0-beta.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "pug": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HubSpot/sample-apps-oauth.git"
+  }
+}
