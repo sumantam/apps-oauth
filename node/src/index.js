@@ -11,6 +11,8 @@ const PORT = 3000;
 const OBJECTS_LIMIT = 30;
 const CLIENT_ID = process.env.HUBSPOT_CLIENT_ID;
 const CLIENT_SECRET = process.env.HUBSPOT_CLIENT_SECRET;
+const UPS_CLIENT_ID = process.env.UPS_CLIENT_ID;
+const UPS_CLIENT_SECRET = process.env.UPS_CLIENT_SECRET;
 const SCOPES = 'crm.objects.contacts.read';
 const REDIRECT_URI = `http://localhost:${PORT}/oauth-callback`;
 const GRANT_TYPES = {
@@ -209,9 +211,35 @@ app.use((error, req, res, next) => {
   res.status(500).render('error', { error: error.message });
 });
 
+// Function to get a new UPS OAuth token
+async function getUPSToken() {
+    try {
+        const response = await fetch('https://wwwcie.ups.com/security/v1/oauth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Authorization: `Basic ${Buffer.from(`${process.env.UPS_CLIENT_ID}:${process.env.UPS_CLIENT_SECRET}`).toString('base64')}`,
+            },
+            body: 'grant_type=client_credentials'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to get UPS access token: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.access_token;
+    } catch (error) {
+        console.error('Error fetching UPS token:', error.message);
+        throw error;
+    }
+}
+
 
 async function trackShipment() {
     try {
+
+	const token = await getUPSToken();
 	const UPS_API_URL = `https://wwwcie.ups.com/api/track/v1/details/1234578?locale=en_US&returnSignature=false&returnMilestones=false&returnPOD=false`
         const response = await fetch(UPS_API_URL, {
             method: 'GET',
@@ -219,8 +247,7 @@ async function trackShipment() {
 		transId: 'testing',
                 transactionSrc: 'testing',
                 'Content-Type': 'application/json',
-		Authorization: `Bearer eyJraWQiOiI5NzllNmVhYy1iZmExLTQzZmQtYTliZi05NTBhYzE0OGVkNjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJzcml5YS5tYWlsQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiNm5jRnhoSlFuRXFiaVdXaVkyT0FOUEdYSmVpdERtc2R6WFpkcHlGS1BtRlFjWW1EIiwiaXNzIjoiaHR0cHM6Ly9hcGlzLnVwcy5jb20iLCJ1dWlkIjoiMjdENDYyMDItNzUwMC0xMDgyLTlDRTAtOEU2MTM1OTMxQ0MzIiwic2lkIjoiOTc5ZTZlYWMtYmZhMS00M2ZkLWE5YmYtOTUwYWMxNDhlZDYzIiwiYXVkIjoiSHVic3BvdCBVUFMgVHJhY2tpbmcgQXBwIiwiYXQiOiJHY0FrN3RXNGF5ZGxyVFlpdlMzTDlSZ1VWOEp1IiwibmJmIjoxNzQyODI5OTcwLCJEaXNwbGF5TmFtZSI6Ikh1YnNwb3QgVVBTIFRyYWNraW5nIEFwcCIsImV4cCI6MTc0Mjg0NDM3MCwiaWF0IjoxNzQyODI5OTcwLCJqdGkiOiI5NGJlY2JmMC03MjkzLTQwNzMtYTRiNi01ZWUyZWNhNWRkMzMifQ.PR0NqLI_WzpsK6Uu7kNXPNczZp9O43ed79IlvDmtwWZhRoLDM5RDTt9FiaPVWP_Kda4HSP6fu0v_xK-WhmLLxN8ga7_dh7eExwsArVYog9TjgzjE2a8sISwWKHPHL3fHtDKbkZ17VpIO-Yj_06JT0P9Iac1iLxwXTeu6ifbgO831i4_IgxiW6t9P8wWChK9K7sx_ZGkYgZcCbge-34nZFez6gyYiWeYmHCvlZDAUo7d9EKZDym7WUuR7AlZwtq87fpJ9J1eRndjg0EYfh2DerI2-bSTo1zuieFoE0CamqhiiF1DSGtuB7DWLejhlQV-uSqK-fouM9X0McQZksGBHH1ACjFQw8N0sTQWdBNf8yi0WHSIu9TG_9BFgknmy3jdnW0_hjdwTMHkBeKwd9hCwm8WTxXTY4jLSCdZd_3q9ZUPQTvWwwFsWSmPMBq6jUzahtf-mgJpVq6dv6xHrUbqA3wjwDOOchcjaLZuLFK0-pWprFPcA0fwW4E4SHUOmgmWqrbD4-i05poNCNsUGUMUJOMg3-Wet7j_X44OuCkAspugtqkrMTmXY5TmEZGfaV7gpg3Adu6KbhE7MlU4MbRbmP3E4MeZzrEXYiFjjfHyKKDHr54XLm5oRq5uF1-BdEajXsM37Ra-uomJQSLtj5oxj6EqwxBHnEditjr8GhURWF6E`
-
+		Authorization: `Bearer ${token}`
             }
         });
 
