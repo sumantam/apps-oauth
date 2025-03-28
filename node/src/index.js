@@ -3,11 +3,15 @@ const path = require('path');
 const express = require('express');
 const hubspot = require('@hubspot/api-client');
 const bodyParser = require('body-parser');
+const os = require('os');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 //const fetch = require('node-fetch'); // Import fetch for Node.js
 const fetch = global.fetch || require('node-fetch');
 require('./config');
 
-const PORT = 3000;
+const PORT = 3002;
 const OBJECTS_LIMIT = 30;
 const CLIENT_ID = process.env.HUBSPOT_CLIENT_ID;
 const CLIENT_SECRET = process.env.HUBSPOT_CLIENT_SECRET;
@@ -281,4 +285,15 @@ app.get('/tracking', async (req, res) => {
 
 });
 
-app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+const options = {
+  key: fs.readFileSync('/etc/ssl/private/stripeapp.key'),
+  cert: fs.readFileSync('/etc/ssl/certs/stripeapp.crt'),
+  //ca: fs.readFileSync('/etc/ssl/certs/yourdomain-chain.crt'),  // Only needed if using an intermediate CA
+};
+// Start the HTTPS server instead of the HTTP one
+https.createServer(options, app).listen(PORT, () => {
+  console.log(`=== Starting your app on https://localhost:${PORT} ===`);
+  //open(`https://localhost:${PORT}`);  // Automatically open in the browser
+});
+
+//app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
