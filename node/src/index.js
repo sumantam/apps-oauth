@@ -240,11 +240,11 @@ async function getUPSToken() {
 }
 
 
-async function trackShipment() {
+async function trackShipment(inquiryNumber) {
     try {
 
 	const token = await getUPSToken();
-	const UPS_API_URL = `https://wwwcie.ups.com/api/track/v1/details/1234578?locale=en_US&returnSignature=false&returnMilestones=false&returnPOD=false`
+	const UPS_API_URL = `https://wwwcie.ups.com/api/track/v1/details/${inquiryNumber}?locale=en_US&returnSignature=false&returnMilestones=false&returnPOD=false`
         const response = await fetch(UPS_API_URL, {
             method: 'GET',
             headers: {
@@ -275,9 +275,15 @@ app.get('/tracking', async (req, res) => {
     if (!isAuthorized()) return res.redirect('/login');
     if (isTokenExpired()) await refreshToken();
 */
-    console.log('Calling ups tracking');
-    // Run the function
-    const data = await trackShipment();
+    const inquiryNo = req.query.inquiryNo;
+
+    if (!inquiryNo) {
+      return res.status(400).json({ error: 'Missing inquiryNo query parameter' });
+    }
+
+    console.log(`Calling UPS tracking with inquiryNo: ${inquiryNo}`);
+
+    const data = await trackShipment(inquiryNo);
     res.json({ status: 'success', trackingData: data });
   } catch (e) {
     handleError(e, res);
