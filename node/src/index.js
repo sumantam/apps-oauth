@@ -290,10 +290,15 @@ const options = {
   cert: fs.readFileSync('/etc/ssl/certs/stripeapp.crt'),
   //ca: fs.readFileSync('/etc/ssl/certs/yourdomain-chain.crt'),  // Only needed if using an intermediate CA
 };
+
 // Start the HTTPS server instead of the HTTP one
-https.createServer(options, app).listen(PORT, () => {
-  console.log(`=== Starting your app on https://localhost:${PORT} ===`);
+//https.createServer(options, app).listen(PORT, () => {
+//  console.log(`=== Starting your app on https://localhost:${PORT} ===`);
+//  //open(`https://localhost:${PORT}`);  // Automatically open in the browser
+//});
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`=== Starting your app on http://localhost:${PORT} ===`);
   //open(`https://localhost:${PORT}`);  // Automatically open in the browser
 });
-
 //app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
