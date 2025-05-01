@@ -11,13 +11,21 @@ const http = require('http');
 const fetch = global.fetch || require('node-fetch');
 require('./config');
 
-const PORT = 3002;
+const PORT = 3000;
 const OBJECTS_LIMIT = 30;
 const CLIENT_ID = process.env.HUBSPOT_CLIENT_ID;
 const CLIENT_SECRET = process.env.HUBSPOT_CLIENT_SECRET;
 const UPS_CLIENT_ID = process.env.UPS_CLIENT_ID;
 const UPS_CLIENT_SECRET = process.env.UPS_CLIENT_SECRET;
-const SCOPES = 'crm.objects.contacts.read';
+// const SCOPES = 'crm.objects.contacts.read';
+const SCOPES = [
+  'crm.objects.contacts.read',
+  'crm.objects.contacts.write',
+  'crm.objects.deals.read',
+  'crm.objects.deals.write',
+  'oauth'
+];
+
 const REDIRECT_URI = `http://localhost:${PORT}/oauth-callback`;
 const GRANT_TYPES = {
   AUTHORIZATION_CODE: 'authorization_code',
@@ -291,6 +299,7 @@ app.get('/tracking', async (req, res) => {
 
 });
 
+// Enable the below lines for https on the AWS server
 const options = {
   key: fs.readFileSync('/etc/ssl/private/stripeapp.key'),
   cert: fs.readFileSync('/etc/ssl/certs/stripeapp.crt'),
